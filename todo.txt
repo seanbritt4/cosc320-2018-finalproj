@@ -1,0 +1,8 @@
+laid this down as foundation for project, threw some code together to have a base to work with later.
+all this does is generate the array and a (shoddy) double ended sort
+
+TODO:
+  -implement parallel computing, obviously
+  -fix deSort
+  -do we want to condense? I wrote header files in case we wanted to add functions to them
+    but did not consider anything past that
