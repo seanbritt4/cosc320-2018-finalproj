@@ -1,8 +1,31 @@
-laid this down as foundation for project, threw some code together to have a base to work with later.
-all this does is generate the array and a (shoddy) double ended sort
+- Converted program from C++ to C
+- Added support for writing arrays to files, improved array generation
+- Began working on threading
 
-TODO:
-  -implement parallel computing, obviously
-  -fix deSort
-  -do we want to condense? I wrote header files in case we wanted to add functions to them
-    but did not consider anything past that
+------MAJOR CHANGES IN EACH FILE------
+main:
+  began implementing threads but ran into compilation issue
+deSort.h:
+  added dummy functions to test threads
+arr.h:
+  printArr(int* arr) now used mostly for debugging since writing arrays to files
+  writeArr(int* arr, char* file) will write array [passed as arr] to file [passed as file]
+  added status lines to be printed to stdout
+  shuffle(int* arr) will randomize array
+  
+NOTES: array is generated in DESCENDING order and sorted into ASCENDING order
+      (this is to illustrate that array was both randomized and sorted)
+      
+      shuffle() has a for loop which runs MANY, MANY times [is it enough? too much?]
+       
+PLAN:
+  -fix current compilation issue
+  -implement parallel computing:
+    2 threads(thr1, thr2)
+    first searches first half of array, tracks index of high and low values
+    then signals for second thread to do the same
+    threads then pipe values to one another (thr1 sends high to thr2, thr2 sends low to thr1)
+    use piped info as needed
+    make swap
+    repeat until sorted
+    
