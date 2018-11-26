@@ -10,12 +10,13 @@
  #include <unistd.h>
 
 //global int- one million
-int oneMil = 15;//1000000;
+int oneMil = 14;//1000000; //--only use EVEN numbers here... supp. for odds unnecessary atm
+int* arr;
 
 
 // writes array to screen
 // currently unused
-void printArr(int *arr)
+void printArr()
 {
     int i;
     for(i =0; i<oneMil; i++){
@@ -28,7 +29,7 @@ void printArr(int *arr)
 //writes array to FILE passed 
 // TODO- test for 1,000,000... file too large for c9 lol
 //     - works for 50,000
-void writeArr(int* arr, char* file)
+void writeArr(char* file)
 {
     
     umask(0);
@@ -43,7 +44,7 @@ void writeArr(int* arr, char* file)
     
     lseek(des, 0, SEEK_SET);
     int i;
-    printf("Writing to \"%s...\"", file);
+    printf("Writing to \"%s\"...", file);
     for(i =0; i<oneMil; i++)
     {
         lseek(des, 0, SEEK_CUR);            
@@ -54,17 +55,17 @@ void writeArr(int* arr, char* file)
     }    
     
     fclose(des);
-    printf("Done\n");   
+    printf("Complete\n");   
 }
 
 
 // takes an array as argument named arr
 // randomize order of array passed as argument
 //  return randomized array
-int* shuffle(int *arr)
+void shuffle()
 {
     srand(time(NULL));
-    printf("Shuffling array...");
+    printf("Shuffling array........");
     int i = 0, count = 0;
     
 
@@ -80,29 +81,27 @@ int* shuffle(int *arr)
     }
 
 
-    printf(" Done\n");
-    writeArr(arr, "shuf.txt");
-
-    return arr;
+    printf(" Complete\n");
+    writeArr("shuf.txt");
 }
 
 // generates 1,000,000 element array with numbers 0-999,999 in DESCENDING order
 //  then calls shuffle() to  the array
 //  returns array
-int* genArr()
+void genArr()
 {
-    printf("Generating array...");
+    printf("Generating array.......");
     int i;
-    int *arr = malloc(oneMil * sizeof(arr));
+    arr = malloc(oneMil * sizeof(arr));
 
     for(i = 0; i < oneMil; i++)
     {
         arr[i] = oneMil - i;
     }
     
-    printf(" Done\n");
-    writeArr(arr, "orig.txt");
-    return shuffle(arr);
+    printf(" Complete\n");
+    writeArr("orig.txt");
+    shuffle();
 }
 
 

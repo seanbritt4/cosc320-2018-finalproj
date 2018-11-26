@@ -8,9 +8,9 @@
 
 int fd1[2], fd2[2];
 
-void *frontEnd(void *arg)
+void *frontEnd()
 {
-	int *arr = (int *) arg;
+// 	int *arr = (int *) arg;
 
     int i;
     close(fd1[RD_END]);
@@ -35,10 +35,10 @@ void *frontEnd(void *arg)
 	return NULL;
 }
 
-void *backEnd(void* arg)
+void *backEnd()
 {
     
-	int *arr = (int *) arg;
+// 	int *arr = (int *) arg;
 //    wait(1);
     int i;
 //    char msg[30];
@@ -83,7 +83,7 @@ int backEnd(int arr){
 */
 
 int main(){
-	int* a = genArr();
+    genArr();
 	int i, p;
     pipe(fd1);
     pipe(fd2);
@@ -106,8 +106,8 @@ int main(){
 	
 	pthread_t threads[2];
     
-	pthread_create(&threads[0], NULL, frontEnd, (void*) a);
-	pthread_create(&threads[1], NULL, backEnd, (void*) a);
+	pthread_create(&threads[0], NULL, frontEnd, NULL);
+	pthread_create(&threads[1], NULL, backEnd, NULL);
 	
 	for(i = 0; i < 2; i++)
 	{
@@ -115,7 +115,7 @@ int main(){
 	}
 	
 	
-	writeArr(a, "sort.txt");
+	writeArr("sort.txt");
 	
 	return 0;
 }
