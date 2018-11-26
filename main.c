@@ -1,6 +1,4 @@
-//#include "deSort.h"
 #include "arr.h"
-
 #include <pthread.h>
 
 #define RD_END 0
@@ -9,111 +7,86 @@
 int fd1[2], fd2[2];
 
 void *frontEnd()
+// void frontEnd()
 {
-// 	int *arr = (int *) arg;
-
     int i;
     close(fd1[RD_END]);
     close(fd2[WR_END]);
     
-    printf("in front end\n");
-    for(i = 0; i < oneMil/2; i++){
-        printf("%d\n", arr[i]);   
+    char* fmsg = "hello from front end";
+    char bmsg[30];
+    
+    for(i = 0; i < oneMil/2; i++)
+    {
+        printf("in front end: %d\n", arr[i]); 
+        write(fd1[WR_END], fmsg, sizeof(fmsg));
 
-        //find highest in front half and send to back end
-//        char* str = "hello from front end\n";
-//        write(fd1[WR_END], a, sizeof(a));
-//        wait();
-        
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        //read                                                                                                                                                                                                                                                                                                  lowest from bck end and compare
+        wait();
+        read(fd2[RD_END], bmsg, 30);
+        printf("%s\n", bmsg);
+
+        //GOAL:
+        /*find highest in front half and send to back end
         //if lower than lowest in front end:
         //  swap arr[i] with lowest from back end
         //else:
         //  discard lowest from back end and swap normally
-            
+        */    
     }
 	return NULL;
 }
 
 void *backEnd()
+// void backEnd()
 {
-    
-// 	int *arr = (int *) arg;
-//    wait(1);
+    wait();
     int i;
-//    char msg[30];
+
     close(fd1[WR_END]);
     close(fd2[RD_END]);
 
-	printf("in back end\n");
+    char* bmsg = "hello from back end";
+    char fmsg[30];
     
     //i=1 bc genArr() is creating at least one extra value
-    
-	for(i = 1; i <= oneMil/2; i++){
-        printf("%d: %d\n", oneMil - i, arr[oneMil - i]); 
-//        wait();
-        //find highest in back end
-        
+    // for(i = 1; i <= oneMil/2; i++)          ///try this to see what i mean
+	for(i = 1; i <= oneMil/2; i++)
+	{
+        wait();
+        read(fd2[RD_END], bmsg, 30);
+
+        printf("%s\n", fmsg);
+
+	    printf("in back end: %d\n", arr[oneMil - i]);
+	    write(fd2[WR_END], bmsg, sizeof(bmsg));
+	  
+	    //GOAL:
+        /*find highest in back end
         //read highest from front end
-//        read(fd2, msg, 30);
-//        printf("%s\n", msg);
         //if highest from front end > highest from back end:
         //  swap arr[i] with highest fron front end
         //else:
         //  swap[i] with highest from back end
+        */
     }
     
     return NULL;
 }
 
-
-/*
-int frontEnd(int arr){
-    int lo = -999;
-    
-//    writeArr(arr, "front-end.txt");
-    
-    return lo + arr;
-}
-
-int backEnd(int arr){
-    int hi = 999;
-    return hi - arr;
-}
-*/
-
-int main(){
+int main()
+{
     genArr();
 	int i, p;
     pipe(fd1);
     pipe(fd2);
     
-    /*
-    pid = fork();
-    pipe(pip);
-    
-    if(pid == 0)
-    {
-        printf("in child\n");
-        printf("front end %d\n", frontEnd(4));
-    }
-    else
-    {
-        printf("in parent\n");
-        printf("back end %d\n", backEnd(4));
-    }
-    */
-	
-	pthread_t threads[2];
+ 	pthread_t threads[2];
     
 	pthread_create(&threads[0], NULL, frontEnd, NULL);
+	pthread_join(threads[0], NULL);
+	
 	pthread_create(&threads[1], NULL, backEnd, NULL);
-	
-	for(i = 0; i < 2; i++)
-	{
-		(void) pthread_join(threads[i], NULL);
-	}
-	
+	pthread_join(threads[1], NULL);
 	
 	writeArr("sort.txt");
 	
