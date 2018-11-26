@@ -10,16 +10,17 @@
  #include <unistd.h>
 
 //global int- one million
-int oneMil = 14;//1000000; //--only use EVEN numbers here... supp. for odds unnecessary atm
+int oneMil = 14;//1000000;              //--only use EVEN numbers here... supp. for odds unnecessary atm
 int* arr;
 
 
 // writes array to screen
-// currently unused
+// currently unused or used only for debugging
 void printArr()
 {
     int i;
-    for(i =0; i<oneMil; i++){
+    for(i =0; i<oneMil; i++)
+    {
         if(i == oneMil - 1)  printf("%d: %d\n", i, arr[i]);      //formatting, writes new line instead of ,
         else        printf("%d: %d, ", i, arr[i]);               //formatting, writes , instead of new line
 
@@ -49,7 +50,6 @@ void writeArr(char* file)
     {
         lseek(des, 0, SEEK_CUR);            
         char str[20];                       //string buffer
-        // str[0] = 'd';                       //stack overflow said to initialize first ele. but seems to work lol
         sprintf(str, "%d: %d", i, arr[i]);  //format string to print
         fprintf(des, "%s\n", str);          //print str to file
     }    
