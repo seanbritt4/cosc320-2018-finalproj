@@ -32,7 +32,6 @@ void *frontEnd(void *arg)
         //  discard lowest from back end and swap normally
             
     }
-    
 	return NULL;
 }
 
