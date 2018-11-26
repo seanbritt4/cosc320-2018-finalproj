@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
-// #include <unistd.h>
+ #include <unistd.h>
 
 //global int- one million
 int oneMil = 15;//1000000;
@@ -43,7 +43,7 @@ void writeArr(int* arr, char* file)
     
     lseek(des, 0, SEEK_SET);
     int i;
-    printf("Writing to \"%s...\"\n", file);
+    printf("Writing to \"%s...\"", file);
     for(i =0; i<oneMil; i++)
     {
         lseek(des, 0, SEEK_CUR);            
