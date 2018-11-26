@@ -1,20 +1,4 @@
 
-------MAJOR CHANGES IN EACH FILE------
-main:
-  moved deSort.h into main.c
-  began work with thread/piping
-deSort.h:
-  NO LONGER BEING USED
-  moved to main.c
-
-PLAN:
-  -(fix current compilation issue) warnings, compiles nd runs for now, still wnt to resolve if possible
-  -implement parallel computing:
-    2 threads(thr1, thr2)
-    first searches first half of array, tracks index of high and low values
-    then signals for second thread to do the same
-    threads then pipe values to one another (thr1 sends high to thr2, thr2 sends low to thr1)
-    use piped info as needed
-    make swap
-    repeat until sorted
-    
+------NOTICE------
+made array a global variable in arr.h. since it is included in main.c it is accessible throughout the program
+began testing with threads but output ends early indicating that the program terminates early for some reason
