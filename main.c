@@ -110,13 +110,6 @@ void *backEnd()
 }
 */
 
-void swap(int *xp, int *yp)
-{
-    int temp = *xp;
-    *xp = *yp;
-    *yp = temp;
-}
-
 void *minSelectionSort(){
     int i, j, min_index;
     int min = MAX_NUM+1;
@@ -125,8 +118,9 @@ void *minSelectionSort(){
         min_index = i;
         for(j = i+1; j < MAX_NUM; j++){
             if(arr[j] < arr[min_index]){
-                printArr();
                 min_index = j;
+                printf("minSelectionSort: ");
+                printArr();
             }
         }
         swap(&arr[min_index], &arr[i]);
@@ -134,14 +128,20 @@ void *minSelectionSort(){
 }
 
 void *maxSelectionSort(){
-    int i;
+    int i, j, max_index;
     int max = 0;
-    for(i = 0; i < MAX_NUM; i++){
-        if(arr[i] > max){
-            max = arr[i];
+
+    for(i = MAX_NUM; i > 0; i--){
+        max_index = i;
+        for(j = i+1; j < MAX_NUM; j++){
+            if(arr[max_index] > arr[j]){
+                max_index = j;
+                printf("maxSelectionSort: ");
+                printArr();
+            }
         }
+        swap(&arr[max_index], &arr[i]);
     }
-    printf("Thread 2 max value found: %d\n", max);
 }
 
 int main()
