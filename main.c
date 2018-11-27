@@ -5,41 +5,78 @@
 #define WR_END 1
 
 int fd1[2], fd2[2];
-
+int status;
+/*
 void *frontEnd()
-// void frontEnd()
 {
+    int i;
+    int max = 0;
+    int fromBackEnd = 0;
+
+    close(fd1[RD_END]);
+    close(fd2[WR_END]);
+
+    for(i = 0; i < MAX_NUM/2; i++){
+        if(arr[i] > max){
+            max = arr[i];
+        }
+    }
+
+    printf("Max in the first %d is: %d\n", MAX_NUM/2, max);
+    write(fd1[WR_END], max, sizeof(max));
+    wait(&status);
+    read(fd2[RD_END], fromBackEnd, sizeof(fromBackEnd));
+    //wait(&status);
+    printf("FRONT END Max in the second %d is: %d\n", MAX_NUM/2, fromBackEnd);
+    /*
     int i;
     close(fd1[RD_END]);
     close(fd2[WR_END]);
-    
+
     char* fmsg = "hello from front end";
     char bmsg[30];
-    
-    for(i = 0; i < oneMil/2; i++)
+
+    for(i = 0; i < MAX_NUM/2; i++)
     {
-        printf("in front end: %d\n", arr[i]); 
-        write(fd1[WR_END], fmsg, sizeof(fmsg));
+    printf("in front end: %d\n", arr[i]);
+    write(fd1[WR_END], fmsg, sizeof(fmsg));
 
-        wait();
-        read(fd2[RD_END], bmsg, 30);
-        printf("%s\n", bmsg);
+    wait(&status);
+    read(fd2[RD_END], bmsg, 30);
+    printf("%s\n", bmsg);
 
-        //GOAL:
-        /*find highest in front half and send to back end
-        //if lower than lowest in front end:
-        //  swap arr[i] with lowest from back end
-        //else:
-        //  discard lowest from back end and swap normally
-        */    
-    }
-	return NULL;
+    //GOAL:
+    /*find highest in front half and send to back end
+    //if lower than lowest in front end:
+    //  swap arr[i] with lowest from back end
+    //else:
+    //  discard lowest from back end and swap normally
+    /
+    //}
+return NULL;
 }
 
 void *backEnd()
-// void backEnd()
 {
-    wait();
+    wait(&status);
+    int i;
+    int max = 0;
+    int fromBackEnd;
+
+    close(fd1[WR_END]);
+    close(fd2[RD_END]);
+
+    for(i = MAX_NUM/2; i < MAX_NUM; i++){
+        if(arr[i] > max){
+            max = arr[i];
+        }
+    }
+    write(fd2[WR_END], max, sizeof(max));
+    //printf("BACK END Max in the second %d is: %d\n", MAX_NUM/2, max);
+    //write(fd2[WR_END], max, sizeof(max));
+
+
+    wait(&status);
     int i;
 
     close(fd1[WR_END]);
@@ -47,48 +84,82 @@ void *backEnd()
 
     char* bmsg = "hello from back end";
     char fmsg[30];
-    
-    //i=1 bc genArr() is creating at least one extra value
-    // for(i = 1; i <= oneMil/2; i++)          ///try this to see what i mean
-	for(i = 1; i <= oneMil/2; i++)
-	{
-        wait();
+
+    // i=1 bc genArr() is creating at least one extra value
+    // for(i = 1; i <= MAX_NUM/2; i++), try this to see what i mean
+    for(i = 1; i <= MAX_NUM/2; i++)
+    {
+        wait(&status);
         read(fd2[RD_END], bmsg, 30);
 
         printf("%s\n", fmsg);
 
-	    printf("in back end: %d\n", arr[oneMil - i]);
-	    write(fd2[WR_END], bmsg, sizeof(bmsg));
-	  
-	    //GOAL:
-        /*find highest in back end
-        //read highest from front end
-        //if highest from front end > highest from back end:
-        //  swap arr[i] with highest fron front end
-        //else:
-        //  swap[i] with highest from back end
-        */
-    }
-    
+        printf("in back end: %d\n", arr[MAX_NUM - i]);
+        write(fd2[WR_END], bmsg, sizeof(bmsg));
+
+        //GOAL:
+          /*find highest in back end
+          //read highest from front end
+          //if highest from front end > highest from back end:
+          //  swap arr[i] with highest fron front end
+          //else:
+          //  swap[i] with highest from back end
+          /
+    //}
     return NULL;
+}
+*/
+
+void swap(int *xp, int *yp)
+{
+    int temp = *xp;
+    *xp = *yp;
+    *yp = temp;
+}
+
+void *minSelectionSort(){
+    int i, j, min_index;
+    int min = MAX_NUM+1;
+
+    for(i = 0; i < MAX_NUM; i++){
+        min_index = i;
+        for(j = i+1; j < MAX_NUM; j++){
+            if(arr[j] < arr[min_index]){
+                printArr();
+                min_index = j;
+            }
+        }
+        swap(&arr[min_index], &arr[i]);
+    }
+}
+
+void *maxSelectionSort(){
+    int i;
+    int max = 0;
+    for(i = 0; i < MAX_NUM; i++){
+        if(arr[i] > max){
+            max = arr[i];
+        }
+    }
+    printf("Thread 2 max value found: %d\n", max);
 }
 
 int main()
 {
     genArr();
-	int i, p;
+    int i, p;
     pipe(fd1);
     pipe(fd2);
-    
- 	pthread_t threads[2];
-    
-	pthread_create(&threads[0], NULL, frontEnd, NULL);
-	pthread_join(threads[0], NULL);
-	
-	pthread_create(&threads[1], NULL, backEnd, NULL);
-	pthread_join(threads[1], NULL);
-	
-	writeArr("sort.txt");
-	
-	return 0;
+
+    pthread_t threads[2];
+
+    pthread_create(&threads[0], NULL, minSelectionSort, NULL);
+    pthread_join(threads[0], NULL);
+
+    pthread_create(&threads[1], NULL, maxSelectionSort, NULL);
+    pthread_join(threads[1], NULL);
+
+    writeArr("sort.txt");
+
+    return 0;
 }

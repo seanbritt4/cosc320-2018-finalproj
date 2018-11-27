@@ -1,4 +1,5 @@
 
 ------NOTICE------
-made array a global variable in arr.h. since it is included in main.c it is accessible throughout the program
-began testing with threads but output ends early indicating that the program terminates early for some reason
+made array a global variable in arr.h. since it is included in main.c it
+is accessible throughout the program began testing with threads but output
+ends early indicating that the program terminates early for some reason

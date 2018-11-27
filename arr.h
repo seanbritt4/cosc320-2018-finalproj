@@ -5,12 +5,13 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <fcntl.h>
+#include <unistd.h>
 
- #include <unistd.h>
+#define MAX_NUM 20
 
-//global int- one million
-int oneMil = 14;//1000000;              //--only use EVEN numbers here... supp. for odds unnecessary atm
+//global integer array for use by all threads
 int* arr;
 
 
@@ -19,43 +20,42 @@ int* arr;
 void printArr()
 {
     int i;
-    for(i =0; i<oneMil; i++)
+    for(i = 0; i < MAX_NUM; i++)
     {
-        if(i == oneMil - 1)  printf("%d: %d\n", i, arr[i]);      //formatting, writes new line instead of ,
-        else        printf("%d: %d, ", i, arr[i]);               //formatting, writes , instead of new line
-
+        printf("%d, ", arr[i]);
     }
+    printf("\n");
 }
 
-//writes array to FILE passed 
+//writes array to FILE passed
 // TODO- test for 1,000,000... file too large for c9 lol
 //     - works for 50,000
 void writeArr(char* file)
 {
-    
+
     umask(0);
     FILE* des = fopen(file, "w");    //using FOPEN to use FPRINTF
-    
+
     // fopen validation - remove if not wanted/needed
     if(des < 0)
     {
         printf("Open File Error\n");
         exit(0);
     }
-    
-    lseek(des, 0, SEEK_SET);
+
+    lseek((long)des, 0, SEEK_SET);
     int i;
     printf("Writing to \"%s\"...", file);
-    for(i =0; i<oneMil; i++)
+    for(i =0; i<MAX_NUM; i++)
     {
-        lseek(des, 0, SEEK_CUR);            
+        lseek((long)des, 0, SEEK_CUR);
         char str[20];                       //string buffer
         sprintf(str, "%d: %d", i, arr[i]);  //format string to print
         fprintf(des, "%s\n", str);          //print str to file
-    }    
-    
+    }
+
     fclose(des);
-    printf("Complete\n");   
+    printf("Complete\n");
 }
 
 
@@ -65,23 +65,23 @@ void writeArr(char* file)
 void shuffle()
 {
     srand(time(NULL));
-    printf("Shuffling array........");
+    printf("Shuffling array.........");
     int i = 0, count = 0;
-    
 
-    for(;i<oneMil * 10; i++)
+
+    for(;i<MAX_NUM * 10; i++)
     {
         int temp;
-        int a = arr[rand() % oneMil];
-        int b = arr[rand() % oneMil];
-        
+        int a = arr[rand() % MAX_NUM];
+        int b = arr[rand() % MAX_NUM];
+
         temp = arr[a];
         arr[a] = arr[b];
         arr[b] = temp;
     }
 
 
-    printf(" Complete\n");
+    printf("Complete\n");
     writeArr("shuf.txt");
 }
 
@@ -90,16 +90,16 @@ void shuffle()
 //  returns array
 void genArr()
 {
-    printf("Generating array.......");
+    printf("Generating array........");
     int i;
-    arr = malloc(oneMil * sizeof(arr));
+    arr = malloc(MAX_NUM * sizeof(arr));
 
-    for(i = 0; i < oneMil; i++)
+    for(i = 0; i < MAX_NUM; i++)
     {
-        arr[i] = oneMil - i;
+        arr[i] = MAX_NUM - i;
     }
-    
-    printf(" Complete\n");
+
+    printf("Complete\n");
     writeArr("orig.txt");
     shuffle();
 }
