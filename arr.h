@@ -17,6 +17,14 @@ int* arr;
 
 // writes array to screen
 // currently unused or used only for debugging
+
+void swap(int *xp, int *yp)
+{
+    int temp = *xp;
+    *xp = *yp;
+    *yp = temp;
+}
+
 void printArr()
 {
     int i;
@@ -66,21 +74,14 @@ void shuffle()
 {
     srand(time(NULL));
     printf("Shuffling array.........");
-    int i = 0, count = 0;
-
-
-    for(;i<MAX_NUM * 10; i++)
-    {
-        int temp;
-        int a = arr[rand() % MAX_NUM];
-        int b = arr[rand() % MAX_NUM];
-
-        temp = arr[a];
-        arr[a] = arr[b];
-        arr[b] = temp;
+    int i = 0, j = 0, count = 0;
+    for(count; count < 10; count++){
+        for(i = MAX_NUM-1; i > 0 ; i--)
+        {
+            int j = arr[rand() % MAX_NUM];
+            swap(&arr[i], &arr[j]);
+        }
     }
-
-
     printf("Complete\n");
     writeArr("shuf.txt");
 }
