@@ -54,7 +54,7 @@ void writeArr(char* file)
     lseek((long)des, 0, SEEK_SET);
     int i;
     printf("Writing to \"%s\"...", file);
-    for(i =0; i<MAX_NUM; i++)
+    for(i = 1; i < MAX_NUM; i++)
     {
         lseek((long)des, 0, SEEK_CUR);
         char str[20];                       //string buffer
@@ -94,8 +94,9 @@ void genArr()
     printf("Generating array........");
     int i;
     arr = malloc(MAX_NUM * sizeof(arr));
+    // arr = malloc(sizeof(MAX_NUM));
 
-    for(i = 0; i < MAX_NUM; i++)
+    for(i = 1; i < MAX_NUM; i++)
     {
         arr[i] = MAX_NUM - i;
     }
