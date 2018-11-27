@@ -119,8 +119,8 @@ void *minSelectionSort(){
         for(j = i+1; j < MAX_NUM; j++){
             if(arr[j] < arr[min_index]){
                 min_index = j;
-                printf("minSelectionSort: ");
-                printArr();
+                // printf("minSelectionSort: ");
+                // printArr();
             }
         }
         swap(&arr[min_index], &arr[i]);
@@ -136,8 +136,8 @@ void *maxSelectionSort(){
         for(j = i+1; j < MAX_NUM; j++){
             if(arr[max_index] > arr[j]){
                 max_index = j;
-                printf("maxSelectionSort: ");
-                printArr();
+                // printf("maxSelectionSort: ");
+                // printArr();
             }
         }
         swap(&arr[max_index], &arr[i]);
@@ -160,6 +160,12 @@ int main()
     pthread_join(threads[1], NULL);
 
     writeArr("sort.txt");
+    
+    printf("show: ");
+    i = 0;
+    while(arr[i] >= 0 && arr[i] <= 215){
+        printf("%d: %d, ", i++, arr[i]);
+    }
 
     return 0;
 }
