@@ -1,165 +1,195 @@
-#include "arr.h"
+#include <fcntl.h>
 #include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
 
-#define RD_END 0
-#define WR_END 1
+#define MAX_NUM 50000
 
-int fd1[2], fd2[2];
-int status;
-/*
-void *frontEnd()
+// Dealing with the array
+void swap(int *xp, int *yp);
+void printArray();
+void writeArray(char *file);
+void generateArray();
+
+// Dealing with the threads + mutex for accessing global arr
+void *minSelectionSort();
+void *maxSelectionSort();
+pthread_mutex_t arr_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void normalSelectionSort();
+
+int *arr;
+
+int main()
 {
-    int i;
-    int max = 0;
-    int fromBackEnd = 0;
+    srand(time(NULL));
+    arr = malloc(sizeof(int[MAX_NUM]));
+    printf("Created new array of %d integer values \n", MAX_NUM);
+    generateArray();
 
-    close(fd1[RD_END]);
-    close(fd2[WR_END]);
-
-    for(i = 0; i < MAX_NUM/2; i++){
-        if(arr[i] > max){
-            max = arr[i];
-        }
-    }
-
-    printf("Max in the first %d is: %d\n", MAX_NUM/2, max);
-    write(fd1[WR_END], max, sizeof(max));
-    wait(&status);
-    read(fd2[RD_END], fromBackEnd, sizeof(fromBackEnd));
-    //wait(&status);
-    printf("FRONT END Max in the second %d is: %d\n", MAX_NUM/2, fromBackEnd);
+    clock_t begin = clock();
     /*
-    int i;
-    close(fd1[RD_END]);
-    close(fd2[WR_END]);
+    pthread_t threads[2];
 
-    char* fmsg = "hello from front end";
-    char bmsg[30];
+    pthread_create(&threads[1], NULL, minSelectionSort, NULL);
+    pthread_create(&threads[2], NULL, maxSelectionSort, NULL);
 
-    for(i = 0; i < MAX_NUM/2; i++)
-    {
-    printf("in front end: %d\n", arr[i]);
-    write(fd1[WR_END], fmsg, sizeof(fmsg));
+    pthread_join(threads[1], NULL);
+    pthread_join(threads[2], NULL);
+    */
+    normalSelectionSort();
+    clock_t end = clock();
+    printf("Time to sort array: %f seconds\n",
+    (double)(end - begin) / CLOCKS_PER_SEC);
 
-    wait(&status);
-    read(fd2[RD_END], bmsg, 30);
-    printf("%s\n", bmsg);
+    writeArray("sort.txt");
 
-    //GOAL:
-    /*find highest in front half and send to back end
-    //if lower than lowest in front end:
-    //  swap arr[i] with lowest from back end
-    //else:
-    //  discard lowest from back end and swap normally
-    /
-    //}
-return NULL;
+    return 0;
 }
-
-void *backEnd()
+void swap(int *xp, int *yp)
 {
-    wait(&status);
-    int i;
-    int max = 0;
-    int fromBackEnd;
-
-    close(fd1[WR_END]);
-    close(fd2[RD_END]);
-
-    for(i = MAX_NUM/2; i < MAX_NUM; i++){
-        if(arr[i] > max){
-            max = arr[i];
-        }
-    }
-    write(fd2[WR_END], max, sizeof(max));
-    //printf("BACK END Max in the second %d is: %d\n", MAX_NUM/2, max);
-    //write(fd2[WR_END], max, sizeof(max));
-
-
-    wait(&status);
-    int i;
-
-    close(fd1[WR_END]);
-    close(fd2[RD_END]);
-
-    char* bmsg = "hello from back end";
-    char fmsg[30];
-
-    // i=1 bc genArr() is creating at least one extra value
-    // for(i = 1; i <= MAX_NUM/2; i++), try this to see what i mean
-    for(i = 1; i <= MAX_NUM/2; i++)
-    {
-        wait(&status);
-        read(fd2[RD_END], bmsg, 30);
-
-        printf("%s\n", fmsg);
-
-        printf("in back end: %d\n", arr[MAX_NUM - i]);
-        write(fd2[WR_END], bmsg, sizeof(bmsg));
-
-        //GOAL:
-          /*find highest in back end
-          //read highest from front end
-          //if highest from front end > highest from back end:
-          //  swap arr[i] with highest fron front end
-          //else:
-          //  swap[i] with highest from back end
-          /
-    //}
-    return NULL;
+    int temp = *xp;
+    *xp = *yp;
+    *yp = temp;
 }
-*/
+void generateArray(){
+    int i = 0;
 
-void *minSelectionSort(){
+    for(i; i < MAX_NUM; i++)
+    {
+        arr[i] = MAX_NUM-i;
+    }
+    writeArray("orig.txt");
+
+    for(i = MAX_NUM-1; i >= 0 ; i--)
+    {
+        int r = (rand() % MAX_NUM);
+        int s = (rand() % MAX_NUM);
+        swap(&arr[r], &arr[s]);
+    }
+    writeArray("shuf.txt");
+}
+
+void writeArray(char* file)
+{
+
+    umask(0);
+    FILE* des = fopen(file, "w");    //using FOPEN to use FPRINTF
+
+    // fopen validation - remove if not wanted/needed
+    if(des < 0)
+    {
+        printf("Open File Error\n");
+        exit(0);
+    }
+
+    lseek((long)des, 0, SEEK_SET);
+    int i;
+    printf("Writing to \"%s\"...", file);
+    for(i =0; i<MAX_NUM; i++)
+    {
+        lseek((long)des, 0, SEEK_CUR);
+        char str[20];                       //string buffer
+        sprintf(str, "%d: %d", i, arr[i]);  //format string to print
+        fprintf(des, "%s\n", str);          //print str to file
+    }
+
+    fclose(des);
+    printf("Complete\n");
+}
+
+void printArray()
+{
+    int i;
+    for(i = 0; i < MAX_NUM; i++)
+    {
+        printf("%d, ", arr[i]);
+    }
+    printf("\n");
+}
+
+void *minSelectionSort()
+{
+    /* GOAL:
+    *   This thread will find the minimal value in the array, and
+    *   place it at the min_index
+    */
     int i, j, min_index;
     int min = MAX_NUM+1;
 
-    for(i = 0; i < MAX_NUM; i++){
+    for(i = 0; i < min/2; i++)
+    {
+        //pthread_mutex_lock(&arr_mutex);
         min_index = i;
         for(j = i+1; j < MAX_NUM; j++){
             if(arr[j] < arr[min_index]){
                 min_index = j;
-                printf("minSelectionSort: ");
-                printArr();
             }
         }
+        //printf("Minimum value %d, placing at front \n", arr[min_index], arr[i]);
+        pthread_mutex_lock(&arr_mutex);
         swap(&arr[min_index], &arr[i]);
+        //printArray();
+        pthread_mutex_unlock(&arr_mutex);
+
     }
 }
 
-void *maxSelectionSort(){
-    int i, j, max_index;
-    int max = 0;
-
-    for(i = MAX_NUM; i > 0; i--){
+void *maxSelectionSort()
+{
+    /* GOAL:
+    *   This thread will find the maximal value in the array, and
+    *   place it at the max_index
+    */
+    int i, j, max, max_index;
+    int final = MAX_NUM+1;
+    for (i = MAX_NUM-1; i > 0; i--)
+    {
+        //pthread_mutex_lock(&arr_mutex);
+        max = arr[i];
         max_index = i;
-        for(j = i+1; j < MAX_NUM; j++){
-            if(arr[max_index] > arr[j]){
+        for (j = 0; j < i; j++)
+        {
+            if (arr[j] > max)
+            {
+                max = arr[j];
                 max_index = j;
-                printf("maxSelectionSort: ");
-                printArr();
             }
         }
-        swap(&arr[max_index], &arr[i]);
+        if (max > arr[i])
+        {
+            pthread_mutex_lock(&arr_mutex);
+            //printf("Maximum value %d, placing at end \n", arr[max_index], arr[i]);
+            swap(&arr[max_index], &arr[i]);
+            //printArray();
+            pthread_mutex_unlock(&arr_mutex);
+        }
+        //pthread_mutex_unlock(&arr_mutex);
     }
 }
 
-int main()
-{
-    genArr();
-    int i, p;
-    pipe(fd1);
-    pipe(fd2);
+void normalSelectionSort(){
+    /* GOAL:
+    *   This thread will find the minimal value in the array, and
+    *   place it at the min_index
+    */
+    int i, j, min_index;
+    int min = MAX_NUM+1;
 
-    pthread_t threads[2];
+    for(i = 0; i < min; i++)
+    {
+        //pthread_mutex_lock(&arr_mutex);
+        min_index = i;
+        for(j = i+1; j < MAX_NUM; j++){
+            if(arr[j] < arr[min_index]){
+                min_index = j;
+            }
+        }
+        //printf("Minimum value %d, placing at front \n", arr[min_index], arr[i]);
+        swap(&arr[min_index], &arr[i]);
+        //printArray();
 
-    pthread_create(&threads[0], NULL, minSelectionSort, NULL);
-    pthread_join(threads[0], NULL);
-
-    pthread_create(&threads[1], NULL, maxSelectionSort, NULL);
-    pthread_join(threads[1], NULL);
-
-    writeArr("sort.txt");
-
-    return 0;
+    }
 }
